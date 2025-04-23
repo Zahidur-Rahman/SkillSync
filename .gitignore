@@ -1,0 +1,3 @@
+# Environment variables (secrets, credentials)
+.env
+alembic.ini
