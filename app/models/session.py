@@ -1,7 +1,14 @@
-from sqlalchemy import Column, Integer, ForeignKey, String, DateTime
+# app/models/session.py
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum
 from sqlalchemy.orm import relationship
-from app.database import Base
+from app.db.base import Base
 from datetime import datetime
+import enum
+
+class SessionStatus(str, enum.Enum):
+    pending = "pending"
+    accepted = "accepted"
+    completed = "completed"
 
 class Session(Base):
     __tablename__ = "sessions"
@@ -12,11 +19,11 @@ class Session(Base):
     provider_id = Column(Integer, ForeignKey("users.id"))
     skill_id = Column(Integer, ForeignKey("skills.id"))
 
-    status = Column(String, default="pending")  # pending, accepted, completed
+    status = Column(Enum(SessionStatus), default=SessionStatus.pending)
     scheduled_time = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    requester = relationship("User", foreign_keys=[requester_id])
-    provider = relationship("User", foreign_keys=[provider_id])
-    skill = relationship("Skill")
+    requester = relationship("User", foreign_keys=[requester_id], back_populates="requested_sessions")
+    provider = relationship("User", foreign_keys=[provider_id], back_populates="provided_sessions")
+    skill = relationship("Skill", back_populates="sessions")
